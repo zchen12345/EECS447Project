@@ -3,25 +3,25 @@
 -- User Table
 --
 
-DROP TABLE IF EXISTS User;
-CREATE TABLE IF NOT EXISTS User (
+DROP TABLE IF EXISTS Users;
+CREATE TABLE IF NOT EXISTS Users (
   user_id INT NOT NULL,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(100) NOT NULL,
   username VARCHAR(50) NOT NULL UNIQUE,
   PRIMARY KEY (user_id)
 );
-INSERT INTO User (user_id, email, password, username)
+INSERT INTO Users (user_id, email, password, username)
 VALUES (13234, 'john.doe@lmail.com', 'idkidc', 'GetLucky');
-INSERT INTO User (user_id, email, password, username)
+INSERT INTO Users (user_id, email, password, username)
 VALUES (13235, 'jane.smith@lmail.com', 'Ilovemath', 'JanSm');
-INSERT INTO User (user_id, email, password, username)
+INSERT INTO Users (user_id, email, password, username)
 VALUES (13236, 'bob.johnson@lmail.com', 'rockyou', 'real_name');
-INSERT INTO User (user_id, email, password, username)
+INSERT INTO Users (user_id, email, password, username)
 VALUES (13237, 'sam@lmail.com', 'samlock', 'thatmoviesuck');
-INSERT INTO User (user_id, email, password, username)
+INSERT INTO Users (user_id, email, password, username)
 VALUES (13238, 'tom@lmail.com', 'password123', 'LoveMovies');
-INSERT INTO User (user_id, email, password, username)
+INSERT INTO Users (user_id, email, password, username)
 VALUES (13239, 'evan@lmail.com', 'notsecurepassword1', 'Evan123');
 -- Genre Table
 --
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS Reviews (
   rating INT NOT NULL,
   comment TEXT DEFAULT NULL,
   PRIMARY KEY (review_id),
-  FOREIGN KEY (user_id) REFERENCES User(user_id),
+  FOREIGN KEY (user_id) REFERENCES Users(user_id),
   FOREIGN KEY (movie_id) REFERENCES Movie(movie_id)
 );
 INSERT INTO Reviews (user_id, movie_id, rating, comment)
