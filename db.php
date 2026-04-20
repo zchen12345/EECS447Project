@@ -1,7 +1,7 @@
 <?php
 
 // Connect to MySQL server, select database
-        $conn = new mysqli('localhost', 'root', '', '447s26_z508c293');
+        $conn = new mysqli('localhost', 'user_name', 'password', 'database_name');
         if ($conn ->connect_error)
                die('Could not connect: ' . $conn->connect_error);
         echo 'sucess';
