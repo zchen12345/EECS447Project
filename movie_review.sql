@@ -5,24 +5,24 @@
 
 DROP TABLE IF EXISTS Users;
 CREATE TABLE IF NOT EXISTS Users (
-  user_id INT NOT NULL,
+  user_id INT AUTO_INCREMENT NOT NULL,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(100) NOT NULL,
   username VARCHAR(50) NOT NULL UNIQUE,
   PRIMARY KEY (user_id)
 );
-INSERT INTO Users (user_id, email, password, username)
-VALUES (13234, 'john.doe@lmail.com', 'idkidc', 'GetLucky');
-INSERT INTO Users (user_id, email, password, username)
-VALUES (13235, 'jane.smith@lmail.com', 'Ilovemath', 'JanSm');
-INSERT INTO Users (user_id, email, password, username)
-VALUES (13236, 'bob.johnson@lmail.com', 'rockyou', 'real_name');
-INSERT INTO Users (user_id, email, password, username)
-VALUES (13237, 'sam@lmail.com', 'samlock', 'thatmoviesuck');
-INSERT INTO Users (user_id, email, password, username)
-VALUES (13238, 'tom@lmail.com', 'password123', 'LoveMovies');
-INSERT INTO Users (user_id, email, password, username)
-VALUES (13239, 'evan@lmail.com', 'notsecurepassword1', 'Evan123');
+INSERT INTO Users (email, password, username)
+VALUES ('john.doe@lmail.com', 'idkidc', 'GetLucky');
+INSERT INTO Users (email, password, username)
+VALUES ('jane.smith@lmail.com', 'Ilovemath', 'JanSm');
+INSERT INTO Users (email, password, username)
+VALUES ('bob.johnson@lmail.com', 'rockyou', 'real_name');
+INSERT INTO Users (email, password, username)
+VALUES ('sam@lmail.com', 'samlock', 'thatmoviesuck');
+INSERT INTO Users (email, password, username)
+VALUES ('tom@lmail.com', 'password123', 'LoveMovies');
+INSERT INTO Users (email, password, username)
+VALUES ('evan@lmail.com', 'notsecurepassword1', 'Evan123');
 -- Genre Table
 --
 

@@ -8,7 +8,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,6 +38,14 @@ if ($conn->connect_error) {
 
 <h1>Movie Review System</h1>
 
+<h2>Create User</h2>
+<form method="POST">
+    <input type="text" name="username" placeholder="Enter username">
+    <input type="email" name="email" placeholder="Enter email">
+    <input type="password" name="password" placeholder="Enter password">
+    <input type="submit" name="create_user" value="Create User">
+</form>
+
 <!-- Search Movie -->
 <h2>Search Movie</h2>
 <form method="POST">
@@ -63,6 +70,36 @@ if ($conn->connect_error) {
 <hr>
 
 <?php
+//CREATE USER
+if (isset($_POST['create_user']) &&
+    !empty($_POST['username']) &&
+    !empty($_POST['email']) &&
+    !empty($_POST['password'])) {
+
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+
+    // Insert WITHOUT user_id
+    $stmt = $conn->prepare("
+        INSERT INTO Users (email, password, username)
+        VALUES (?, ?, ?)
+    ");
+    if (!$stmt) die("Prepare failed: " . $conn->error);
+
+    $stmt->bind_param("sss", $email, $password, $username);
+
+if ($stmt->execute()) {
+    $new_id = $conn->insert_id;
+    echo "<p style='color:green;'>User created! ID: $new_id</p>";
+} else {
+    if ($stmt->errno == 1062) {
+        echo "<p style='color:red;'>Username or email already exists.</p>";
+    } else {
+        echo "<p style='color:red;'>Error: " . $stmt->error . "</p>";
+    }
+}
+}
 // SEARCH MOVIE
 if (isset($_POST['search']) && !empty($_POST['title'])) {
     $title = "%" . $_POST['title'] . "%";
