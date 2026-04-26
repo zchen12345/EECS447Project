@@ -45,7 +45,7 @@ if (isset($_POST['login'])) {
 if (isset($_POST['create_user'])) {
     $username = $_POST['new_username'];
     $email    = $_POST['new_email'];
-    $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+    $password = $_POST['new_password'];
 
     $stmt = $conn->prepare("INSERT INTO Users (email, password, username) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $email, $password, $username);
