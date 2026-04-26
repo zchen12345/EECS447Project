@@ -4,8 +4,57 @@ session_start();
 // Connect to database
 $conn = new mysqli('mysql.eecs.ku.edu', 'username', 'password', 'same as username');
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+
+$error = "";
+$success = "";
+
+// LOGOUT
+if (isset($_POST['logout'])) {
+    session_destroy();
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// LOGIN
+if (isset($_POST['login'])) {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    $stmt = $conn->prepare("SELECT user_id, password FROM Users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        $error = "User not found.";
+    } else {
+        $row = $result->fetch_assoc();
+        if ($password == $row['password']) { // switch to password_verify() once passwords are hashed
+            $_SESSION['user_id'] = $row['user_id'];
+            $_SESSION['username'] = $username;
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } else {
+            $error = "Incorrect password.";
+        }
+    }
+}
+
+// CREATE ACCOUNT
+if (isset($_POST['create_user'])) {
+    $username = $_POST['new_username'];
+    $email    = $_POST['new_email'];
+    $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+
+    $stmt = $conn->prepare("INSERT INTO Users (email, password, username) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $email, $password, $username);
+
+    if ($stmt->execute()) {
+        $success = "Account created! You can now log in.";
+    } else {
+        $error = $stmt->errno == 1062 ? "Username or email already exists." : "Error: " . $stmt->error;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -13,44 +62,128 @@ if ($conn->connect_error) {
 <head>
     <title>Movie Review</title>
     <style>
-        body {
-            font-family: Arial;
-            margin: 20px;
+        body { font-family: Arial; margin: 20px; }
+        table { border-collapse: collapse; width: 80%; margin-bottom: 20px; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; }
+        th { background-color: #f2f2f2; }
+        .tabs { border-bottom: 1px solid #ccc; margin-bottom: 15px; }
+        .tabs button {
+            background: #eee; border: none; cursor: pointer;
+            padding: 10px 15px; font-size: 16px;
         }
-        table {
-            border-collapse: collapse;
-            width: 80%;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
+        .tabs button.active { background: #ccc; font-weight: bold; }
+        .tabcontent { display: none; }
 
+        /* Login styles */
+        .login-container { width: 350px; margin: 60px auto; }
+        .login-container h2 { text-align: center; }
+        .login-container input[type=text],
+        .login-container input[type=email],
+        .login-container input[type=password] {
+            width: 100%; padding: 8px; margin: 6px 0 14px; box-sizing: border-box;
+        }
+        .login-container input[type=submit] { width: 100%; padding: 10px; cursor: pointer; }
+        .login-tabs { display: flex; margin-bottom: 20px; }
+        .login-tabs button {
+            flex: 1; padding: 10px; font-size: 15px;
+            cursor: pointer; background: #eee; border: 1px solid #ccc;
+        }
+        .login-tabs button.active { background: #ccc; font-weight: bold; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tabcontent').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).style.display = 'block';
+            evt.currentTarget.classList.add('active');
+        }
+        function openLoginTab(evt, tabName) {
+            document.querySelectorAll('.login-tabcontent').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('.login-tabs button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).style.display = 'block';
+            evt.currentTarget.classList.add('active');
+        }
+        window.onload = function () {
+            <?php if (isset($_SESSION['user_id'])): ?>
+                // Main app tab
+                const defaultTab = "<?php echo isset($_POST['active_tab']) ? $_POST['active_tab'] : 'movies'; ?>";
+                const btn = document.querySelector(`[onclick*="openTab"][onclick*="${defaultTab}"]`);
+                if (btn) btn.click();
+            <?php else: ?>
+                // Login tab - default to login, switch to register if account just created
+                const defaultLogin = <?php echo ($success ? "'register'" : "'loginTab'"); ?>;
+                const loginBtn = document.querySelector(`[onclick*="openLoginTab"][onclick*="${defaultLogin}"]`);
+                if (loginBtn) loginBtn.click();
+            <?php endif; ?>
+        };
+    </script>
+</head>
 <body>
 
+<?php if (!isset($_SESSION['user_id'])): ?>
+<!-- ==================== LOGIN SCREEN ==================== -->
+<div class="login-container">
+    <h2>Movie Review System</h2>
+
+    <?php if ($error) echo "<p class='error'>$error</p>"; ?>
+    <?php if ($success) echo "<p class='success'>$success</p>"; ?>
+
+    <div class="login-tabs">
+        <button onclick="openLoginTab(event, 'loginTab')">Log In</button>
+        <button onclick="openLoginTab(event, 'registerTab')">Create Account</button>
+    </div>
+
+    <div id="loginTab" class="login-tabcontent">
+        <form method="POST">
+            <label>Username</label>
+            <input type="text" name="username" required>
+            <label>Password</label>
+            <input type="password" name="password" required>
+            <input type="submit" name="login" value="Log In">
+        </form>
+    </div>
+
+    <div id="registerTab" class="login-tabcontent">
+        <form method="POST">
+            <label>Username</label>
+            <input type="text" name="new_username" required>
+            <label>Email</label>
+            <input type="email" name="new_email" required>
+            <label>Password</label>
+            <input type="password" name="new_password" required>
+            <input type="submit" name="create_user" value="Create Account">
+        </form>
+    </div>
+</div>
+
+<?php else: ?>
+<!-- ==================== MAIN APP ==================== -->
+
 <h1>Movie Review System</h1>
+<p>Welcome, <strong><?php echo $_SESSION['username']; ?></strong>!
+    <form method="POST" style="display:inline;">
+        <input type="submit" name="logout" value="Log Out">
+    </form>
+</p>
 
-<h2>Create User</h2>
-<form method="POST">
-    <input type="text" name="username" placeholder="Enter username">
-    <input type="email" name="email" placeholder="Enter email">
-    <input type="password" name="password" placeholder="Enter password">
-    <input type="submit" name="create_user" value="Create User">
-</form>
+<div class="tabs">
+    <button class="tablinks" onclick="openTab(event, 'movies')">Movies</button>
+    <button class="tablinks" onclick="openTab(event, 'searchReviews')">Search Reviews</button>
+    <button class="tablinks" onclick="openTab(event, 'allReviews')">View All Reviews</button>
+    <button class="tablinks" onclick="openTab(event, 'writeReviews')">Write a Review</button>
+</div>
 
-<!-- Search Movie -->
+<!-- MOVIES TAB -->
+<div id="movies" class="tabcontent">
+
 <h2>Search Movie</h2>
 <form method="POST">
     <input type="text" name="title" placeholder="Enter movie title">
     <input type="submit" name="search" value="Search">
+    <input type="hidden" name="active_tab" value="movies">
 </form>
 
 <!-- Filter by Genre -->
@@ -65,6 +198,7 @@ if ($conn->connect_error) {
         <option value="Sci-Fi">Sci-Fi</option>
     </select>
     <input type="submit" name="filter" value="Filter">
+    <input type="hidden" name="active_tab" value="movies">
 </form>
 
 <hr>
@@ -153,10 +287,10 @@ while ($row = $result->fetch_assoc()) {
 }
 echo "</table>";
 ?>
+</div>
 
-<hr>
-
-<!-- Search Reviews -->
+<!-- SEARCH REVIEWS TAB -->
+<div id="searchReviews" class="tabcontent">
 <h2>Search Reviews</h2>
 <form method="POST">
     Movie Title:
@@ -166,6 +300,7 @@ echo "</table>";
     Minimum Rating:
     <input type="number" name="review_rating" min="1" max="5"><br><br>
     <input type="submit" name="search_review" value="Search Reviews">
+    <input type="hidden" name="active_tab" value="searchReviews">
 </form>
 
 <br>
@@ -234,10 +369,10 @@ if (isset($_POST['search_review'])) {
     echo "</table>";
 }
 ?>
+</div>
 
-<hr>
-
-<!-- View All Reviews -->
+<!-- ALL REVIEWS TAB -->
+<div id="allReviews" class="tabcontent">
 <h2>All Reviews</h2>
 
 <?php
@@ -262,9 +397,49 @@ while ($row = $result->fetch_assoc()) {
     echo "</tr>";
 }
 echo "</table>";
-
-$conn->close();
 ?>
+</div>
 
+<!-- WRITE REVIEW TAB -->
+<div id="writeReviews" class="tabcontent">
+    <h2>Write a Review</h2>
+    <form method="POST">
+        <!-- Username is pre-filled from session now! -->
+        Movie Title: <input type="text" name="write_movie"><br><br>
+        Rating: <input type="number" name="write_rating" min="1" max="5"><br><br>
+        Comment: <input type="text" name="write_comment"><br><br>
+        <input type="submit" name="write_review" value="Write a Review">
+        <input type="hidden" name="active_tab" value="writeReviews">
+    </form>
+
+    <?php
+    if (isset($_POST['write_review'])) {
+        $user_id   = $_SESSION['user_id']; // pulled from session instead of form input
+        $movieTitle = $_POST['write_movie'];
+        $rating    = $_POST['write_rating'];
+        $comment   = $_POST['write_comment'];
+
+        $stmt = $conn->prepare("SELECT movie_id FROM Movie WHERE LOWER(title) = LOWER(?)");
+        $stmt->bind_param("s", $movieTitle);
+        $stmt->execute();
+        $movieResult = $stmt->get_result();
+
+        if ($movieResult->num_rows == 0) {
+            echo "<p class='error'>Movie not found.</p>";
+        } else {
+            $movie_id = $movieResult->fetch_assoc()['movie_id'];
+            $stmt = $conn->prepare("INSERT INTO Reviews (user_id, movie_id, rating, comment) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiis", $user_id, $movie_id, $rating, $comment);
+            echo $stmt->execute()
+                ? "<p class='success'>Review added!</p>"
+                : "<p class='error'>Error adding review.</p>";
+        }
+    }
+    ?>
+</div>
+
+<?php endif; ?>
+
+<?php $conn->close(); ?>
 </body>
 </html>
