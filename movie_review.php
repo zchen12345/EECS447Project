@@ -56,6 +56,41 @@ if (isset($_POST['create_user'])) {
         $error = $stmt->errno == 1062 ? "Username or email already exists." : "Error: " . $stmt->error;
     }
 }
+
+// ADD MOVIE AND REVIEW
+if (isset($_POST['add_movie_and_review'])) {
+    $user_id = $_SESSION['user_id'];
+    $movieTitle = $_POST['new_movie_title'];
+    $releaseDate = $_POST['new_release_date'];
+    $genreId = $_POST['new_genre_id'];
+    $rating = $_POST['new_rating'];
+    $comment = $_POST['new_comment'];
+
+    // Insert movie
+    $stmt = $conn->prepare("INSERT INTO Movie (title, release_date, genre_id) VALUES (?, ?, ?)");
+    if (!$stmt) {
+        $error = "Database error: " . $conn->error;
+    } else {
+        $stmt->bind_param("ssi", $movieTitle, $releaseDate, $genreId);
+        if ($stmt->execute()) {
+            $movie_id = $conn->insert_id;
+            
+            // Insert review
+            $reviewStmt = $conn->prepare("INSERT INTO Reviews (user_id, movie_id, rating, comment) VALUES (?, ?, ?, ?)");
+            $reviewStmt->bind_param("iiis", $user_id, $movie_id, $rating, $comment);
+            if ($reviewStmt->execute()) {
+                $success = "Movie &amp; review added successfully!";
+                $_POST['active_tab'] = 'writeReviews';
+            } else {
+                $error = "Movie added but review failed: " . $reviewStmt->error;
+            }
+            $reviewStmt->close();
+        } else {
+            $error = "Error adding movie: " . $stmt->error;
+        }
+        $stmt->close();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -425,7 +460,70 @@ echo "</table>";
         $movieResult = $stmt->get_result();
 
         if ($movieResult->num_rows == 0) {
-            echo "<p class='error'>Movie not found.</p>";
+            // Movie not found — ask user to provide movie details, preserving review input
+            $safe_title   = htmlspecialchars($movieTitle);
+            $safe_rating  = htmlspecialchars($rating);
+            $safe_comment = htmlspecialchars($comment);
+
+            // Fetch genres for the dropdown
+            $genreResult = $conn->query("SELECT genre_id, name FROM Genre ORDER BY name");
+            $genreOptions = "";
+            while ($g = $genreResult->fetch_assoc()) {
+                $genreOptions .= "<option value=\"{$g['genre_id']}\">" . htmlspecialchars($g['name']) . "</option>";
+            }
+
+            echo "
+            <div style='border:1px solid #f0a000; background:#fffbe6; padding:14px; margin-top:12px; border-radius:4px;'>
+                <p class='error'><strong>\"$safe_title\" was not found in the database.</strong>
+                Please fill in the movie details below to add it along with your review.</p>
+                <form method='POST'>
+                    <input type='hidden' name='active_tab'       value='writeReviews'>
+                    <input type='hidden' name='new_movie_title'  value='$safe_title'>
+                    <input type='hidden' name='new_rating'       value='$safe_rating'>
+                    <input type='hidden' name='new_comment'      value='$safe_comment'>
+
+                    <table style='border:none; width:auto;'>
+                        <tr><td colspan='2' style='border:none; padding:4px 0;'>
+                            <strong>Your review</strong>
+                        </td></tr>
+                        <tr>
+                            <td style='border:none; padding:4px 8px 4px 0;'>Movie Title:</td>
+                            <td style='border:none; padding:4px 0;'><strong>$safe_title</strong></td>
+                        </tr>
+                        <tr>
+                            <td style='border:none; padding:4px 8px 4px 0;'>Rating:</td>
+                            <td style='border:none; padding:4px 0;'><strong>$safe_rating / 5</strong></td>
+                        </tr>
+                        <tr>
+                            <td style='border:none; padding:4px 8px 4px 0;'>Comment:</td>
+                            <td style='border:none; padding:4px 0;'><strong>$safe_comment</strong></td>
+                        </tr>
+                        <tr><td colspan='2' style='border:none; padding:12px 0 4px;'>
+                            <strong>Additional movie information required</strong>
+                        </td></tr>
+                        <tr>
+                            <td style='border:none; padding:4px 8px 4px 0;'>Release Date:</td>
+                            <td style='border:none; padding:4px 0;'>
+                                <input type='date' name='new_release_date' required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style='border:none; padding:4px 8px 4px 0;'>Genre:</td>
+                            <td style='border:none; padding:4px 0;'>
+                                <select name='new_genre_id' required>
+                                    <option value=''>-- Select Genre --</option>
+                                    $genreOptions
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan='2' style='border:none; padding:12px 0 0;'>
+                                <input type='submit' name='add_movie_and_review' value='Add Movie &amp; Submit Review'>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>";
         } else {
             $movie_id = $movieResult->fetch_assoc()['movie_id'];
             $stmt = $conn->prepare("INSERT INTO Reviews (user_id, movie_id, rating, comment) VALUES (?, ?, ?, ?)");
