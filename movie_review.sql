@@ -67,13 +67,13 @@ CREATE TABLE IF NOT EXISTS Reviews (
   FOREIGN KEY (movie_id) REFERENCES Movie(movie_id)
 );
 INSERT INTO Reviews (user_id, movie_id, rating, comment)
-VALUES (13234, 1, 5, 'Amazing movie with a mind-bending plot!'),
-       (13235, 2, 4, 'Great action and a compelling story.'),
-       (13236, 3, 5, 'A heartwarming tale with fantastic performances.'),
-       (13237, 4, 3, 'Funny but a bit predictable.'),
-       (13238, 5, 4, 'A unique blend of horror and social commentary.'),
-       (13239, 1, 4, 'Inception was visually stunning and thought-provoking.'),
-       (13234, 2, 5, 'The Dark Knight is a masterpiece of superhero cinema!'),
-       (13235, 3, 4, 'Forrest Gump is a touching story with great performances.'),
-       (13236, 4, 2, 'The Hangover was funny but not my favorite comedy.'),
-       (13237, 5, 5, 'Get Out is a brilliant horror film with a powerful message.');
+VALUES (1, 1, 5, 'Amazing movie with a mind-bending plot!'),
+       (2, 2, 4, 'Great action and a compelling story.'),
+       (3, 3, 5, 'A heartwarming tale with fantastic performances.'),
+       (4, 4, 3, 'Funny but a bit predictable.'),
+       (5, 5, 4, 'A unique blend of horror and social commentary.'),
+       (6, 1, 4, 'Inception was visually stunning and thought-provoking.'),
+       (6, 2, 5, 'The Dark Knight is a masterpiece of superhero cinema!'),
+       (2, 3, 4, 'Forrest Gump is a touching story with great performances.'),
+       (3, 4, 2, 'The Hangover was funny but not my favorite comedy.'),
+       (5, 5, 5, 'Get Out is a brilliant horror film with a powerful message.');
