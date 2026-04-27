@@ -2,7 +2,7 @@
 session_start();
 
 // Connect to database
-$conn = new mysqli('mysql.eecs.ku.edu', '447s26_i662m589', 'YkSJpxfwk2yK', '447s26_i662m589');
+$conn = new mysqli('mysql.eecs.ku.edu', 'username', 'password', 'same as username');
 
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
@@ -197,6 +197,9 @@ if (isset($_POST['add_movie_and_review'])) {
         background: none;
         padding: 0;
         border-radius: 0;
+    }
+    .error {
+    color: #cc0000;
     }
     </style>
     <script>
