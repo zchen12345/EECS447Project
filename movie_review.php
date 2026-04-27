@@ -97,36 +97,107 @@ if (isset($_POST['add_movie_and_review'])) {
 <head>
     <title>Movie Review</title>
     <style>
-        body { font-family: Arial; margin: 20px; }
-        table { border-collapse: collapse; width: 80%; margin-bottom: 20px; }
-        table, th, td { border: 1px solid black; }
-        th, td { padding: 8px; }
-        th { background-color: #f2f2f2; }
-        .tabs { border-bottom: 1px solid #ccc; margin-bottom: 15px; }
-        .tabs button {
-            background: #eee; border: none; cursor: pointer;
-            padding: 10px 15px; font-size: 16px;
-        }
-        .tabs button.active { background: #ccc; font-weight: bold; }
-        .tabcontent { display: none; }
+    /* Background */
+    body {
+        font-family: Arial;
+        margin: 20px;
+        background-color: #0051BA; /* dark blue */
+        color: white;
+    }
 
-        /* Login styles */
-        .login-container { width: 350px; margin: 60px auto; }
-        .login-container h2 { text-align: center; }
-        .login-container input[type=text],
-        .login-container input[type=email],
-        .login-container input[type=password] {
-            width: 100%; padding: 8px; margin: 6px 0 14px; box-sizing: border-box;
-        }
-        .login-container input[type=submit] { width: 100%; padding: 10px; cursor: pointer; }
-        .login-tabs { display: flex; margin-bottom: 20px; }
-        .login-tabs button {
-            flex: 1; padding: 10px; font-size: 15px;
-            cursor: pointer; background: #eee; border: 1px solid #ccc;
-        }
-        .login-tabs button.active { background: #ccc; font-weight: bold; }
-        .error { color: red; }
-        .success { color: green; }
+    /* Headers */
+    h1, h2 {
+        color: #ff0000;
+    }
+
+    /* Top navigation tabs */
+    .tabs {
+        border-bottom: 2px solid #ff0000;
+        margin-bottom: 15px;
+    }
+    .tabs button {
+        background: #cc0000;
+        color: white;
+        border: none;
+        cursor: pointer;
+        padding: 10px 15px;
+        font-size: 16px;
+    }
+    .tabs button.active {
+        background: #ff0000;
+        font-weight: bold;
+    }
+    .tabs button:hover {
+        background: #ff3333;
+    }
+
+    /* Forms */
+    form {
+        background-color: #ffd700; /* golden yellow */
+        padding: 10px;
+        border-radius: 8px;
+        display: inline-block;
+        color: black; /* so form text is readable against yellow */
+    }
+    input[type=text],
+    input[type=email],
+    input[type=password],
+    input[type=number],
+    select {
+        background-color: #fff8dc; /* light yellow */
+        border: 1px solid #cca800;
+        padding: 6px;
+        margin: 4px 0 10px;
+    }
+    input[type=submit] {
+        background-color: #cc0000;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    input[type=submit]:hover {
+        background-color: #ff0000;
+    }
+
+    /* Tables */
+    table, th, td {
+        border: 1px solid white;
+    }
+    th {
+        background-color: #cc0000;
+        color: white;
+    }
+    td {
+        color: white;
+    }
+
+    /* Login container */
+    .login-container {
+        width: 350px;
+        margin: 60px auto;
+        background-color: #ffd700;
+        padding: 20px;
+        border-radius: 10px;
+        color: black;
+    }
+    .login-container h2 {
+        color: #cc0000;
+    }
+    .login-tabs button {
+        background: #cc0000;
+        color: white;
+        border: 1px solid #ff0000;
+    }
+    .login-tabs button.active {
+        background: #ff0000;
+    }
+    .logout-form {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+    }
     </style>
     <script>
         function openTab(evt, tabName) {
@@ -199,7 +270,7 @@ if (isset($_POST['add_movie_and_review'])) {
 
 <h1>Movie Review System</h1>
 <p>Welcome, <strong><?php echo $_SESSION['username']; ?></strong>!
-    <form method="POST" style="display:inline;">
+    <form method="POST" style="display:inline;" class="logout-form">
         <input type="submit" name="logout" value="Log Out">
     </form>
 </p>
