@@ -2,7 +2,7 @@
 session_start();
 
 // Connect to database
-$conn = new mysqli('mysql.eecs.ku.edu', 'username', 'password', 'same as username');
+$conn = new mysqli('mysql.eecs.ku.edu', '447s26_i662m589', 'YkSJpxfwk2yK', '447s26_i662m589');
 
 if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
@@ -245,9 +245,9 @@ if (isset($_POST['add_movie_and_review'])) {
     <div id="loginTab" class="login-tabcontent">
         <form method="POST">
             <label>Username</label>
-            <input type="text" name="username" required>
+            <input type="text" name="username" required><br>
             <label>Password</label>
-            <input type="password" name="password" required>
+            <input type="password" name="password" required><br>
             <input type="submit" name="login" value="Log In">
         </form>
     </div>
@@ -255,11 +255,11 @@ if (isset($_POST['add_movie_and_review'])) {
     <div id="registerTab" class="login-tabcontent">
         <form method="POST">
             <label>Username</label>
-            <input type="text" name="new_username" required>
+            <input type="text" name="new_username" required><br>
             <label>Email</label>
-            <input type="email" name="new_email" required>
+            <input type="email" name="new_email" required><br>
             <label>Password</label>
-            <input type="password" name="new_password" required>
+            <input type="password" name="new_password" required><br>
             <input type="submit" name="create_user" value="Create Account">
         </form>
     </div>
